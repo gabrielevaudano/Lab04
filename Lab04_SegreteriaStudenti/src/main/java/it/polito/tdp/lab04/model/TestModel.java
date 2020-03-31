@@ -6,9 +6,12 @@ public class TestModel {
 
 		Model model = new Model();
 		
-		/*
-		 * 	Write here your test model
-		 */
+
+    	for (Corso c: model.getAllCorsi())
+    		if (c!=null)
+    			System.out.println(c.getNome()+"\n");
+    	
+
 
 	}
 
