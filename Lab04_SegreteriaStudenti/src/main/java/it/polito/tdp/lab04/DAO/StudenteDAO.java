@@ -13,9 +13,10 @@ import it.polito.tdp.lab04.model.Studente;
 public class StudenteDAO {
 	public Studente getStudente(Integer codice) {
 		final String sql = "SELECT nome, cognome, cds FROM studente WHERE matricola = ?";
-		Studente studente;
 		
 		try {
+			Studente studente;
+
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 
@@ -33,7 +34,6 @@ public class StudenteDAO {
 			return studente;
 			
 		} catch (SQLException e) {
-			// e.printStackTrace();
 			throw new RuntimeException("Errore Db: ", e);
 		}
 	}
@@ -42,12 +42,12 @@ public class StudenteDAO {
 		final String sql = "SELECT s.matricola, s.nome, s.cognome, s.cds FROM iscrizione i, corso c, studente s"
 				+ " WHERE i.matricola = s.matricola AND i.codins = c.codins "
 				+ " AND c.codins = ?";
+		
 		List<Studente> studente = new LinkedList<Studente>();
 		
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
-
 			st.setString(1, corso.getCodIns());
 			
 			ResultSet rs = st.executeQuery();
@@ -56,16 +56,15 @@ public class StudenteDAO {
 				studente.add(new Studente(rs.getInt("matricola"), rs.getString("nome"), rs.getString("cognome"), rs.getString("cds")));
 			}
 			
+			conn.close();
+
 			if (studente.size()==0)
 				throw new NullPointerException("Non è presente alcun studente iscritto al corso con tale matricola.");
-			
-			conn.close();
 			
 			return studente; 
 		}
 		catch (SQLException e) {
-			// e.printStackTrace();
-			throw new RuntimeException("Errore Db.", e);
+			throw new RuntimeException("Errore nella gestione del database.", e);
 		}
 	}
 	

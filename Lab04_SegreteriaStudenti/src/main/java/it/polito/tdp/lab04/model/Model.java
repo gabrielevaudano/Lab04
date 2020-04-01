@@ -25,32 +25,22 @@ public class Model {
 		return studenteD.getStudente(matricola);
 	}
 	
-	public List<Studente> getStudentiByCorso(Corso corso) {		
-		return studenteD.getStudentiByCorso(corso);
+	public List<Studente> getStudentiByCorso(Corso corso) {	
+		return studenteD.getStudentiByCorso(corsoD.getCorso(corso)); // faccio così per gestire l'eccezione, potrei passare direttamente il corso se lo verificassi direttamente in FXML Controller
+																	 // ma in questo modo è più semplice da gestire, avendo già creato una classe apposita per la verifica
 	}
 	
-	public List<Corso> getCorsoForStudente(Integer matricola, Corso corso) throws SQLException {
-		
-		if (corso==null)
-			return corsoD.getCorsiForStudente(matricola);
-		else
-			return corsoD.getCorsoForStudente(this.getStudente(matricola), corso);
-
+	public List<Corso> getCorsoForStudente(Studente studente) throws SQLException {
+		return corsoD.getCorsiForStudente(studente);
 	}
 	
 
-	public boolean IscriviStudente(Integer matricola, Corso corso) throws Exception {
-		Studente studente;
-		Corso c;
-
-		studente = studenteD.getStudente(matricola);
-		c = corsoD.getCorso(corso);
-		
-		List<Studente> studenti = studenteD.getStudentiByCorso(corso);
+	public boolean IscriviStudente(Studente studente, Corso corso) throws Exception {		
+		List<Studente> studenti = studenteD.getStudentiByCorso(corsoD.getCorso(corso));
 		
 		if (studenti.contains(studente))
-			throw new IllegalStateException("L'utente è già iscritto al corso selezionato.\n");
+			throw new IllegalStateException("L'utente è iscritto al corso selezionato.");
 		
-		return corsoD.inscriviStudenteACorso(studente, c);
+		return corsoD.inscriviStudenteACorso(studente, corso);
 	}
 }

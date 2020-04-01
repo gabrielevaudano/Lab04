@@ -63,11 +63,7 @@ public class FXMLController {
     void autoCompletamento(ActionEvent event) {
     	try {
     		Integer matricola = Integer.parseInt(txtMatricola.getText());
-    		
-    		if (txtMatricola.getText().length()!=6) {
-    			throw new InvalidParameterException();
-    		}
-    		
+
     		String nome = model.getStudente(matricola).getNome();
     		String cognome = model.getStudente(matricola).getCognome();
    
@@ -75,30 +71,23 @@ public class FXMLController {
     		txtNome.setText(nome);
    	
     	} catch(NumberFormatException e) {
-			txtArea.appendText("Non hai inserito un codice matricola, esso deve contenere solo numeri!\n");
+			txtArea.appendText("Non è stato inserito un numero matricola valido: sono ammessi solo caratteri numerici\\n");
     	} catch (NullPointerException ne) {
 			txtArea.appendText(ne.getMessage() + "\n");
-    	} catch (InvalidParameterException e) {
-    		
     	}
     
     }
 
     @FXML
-    void cercaCorsi(ActionEvent event) {
-    	Corso nomeCorso = comboCorsi.getSelectionModel().getSelectedItem();
-    	
+    void cercaCorsi(ActionEvent event) {    	
     	try {
     		Studente stud = model.getStudente(Integer.parseInt(txtMatricola.getText()));
     		
-    		if (String.valueOf(stud)==null || String.valueOf(stud)=="") 
-    			txtArea.appendText("Non è stato inserito alcun numero matricola.\n");
-    		
-    		for (Corso c: model.getCorsoForStudente(stud.getMatricola(), nomeCorso))
+    		for (Corso c: model.getCorsoForStudente(stud))
     			txtArea.appendText(c.toLongString());
     	
     	} catch(NumberFormatException e) {
-			txtArea.appendText("Il campo matricola accetta solamente numeri.\n");
+			txtArea.appendText("Non è stato inserito un numero matricola valido: sono ammessi solo caratteri numerici.\n");
 		} catch (SQLException e) {
 			txtArea.appendText(e.getMessage()+"\n");
 		} catch (RuntimeException e) {
@@ -108,36 +97,37 @@ public class FXMLController {
     }
 
     @FXML
-    void cercaIscritti(ActionEvent event) {
-		Corso corso = comboCorsi.getSelectionModel().getSelectedItem();
-
-		if (corso==null) {
-			txtArea.appendText("Non hai selezionato alcun corso.\n");
-			return;
-		}
-		
+    void cercaIscritti(ActionEvent event) {		
 		try {
+			Corso corso = comboCorsi.getSelectionModel().getSelectedItem();
+
 			for (Studente studente : model.getStudentiByCorso(corso)) 
 				txtArea.appendText(studente.toString() + "\n");
+			
 		} catch (NullPointerException e) {
-			txtArea.appendText("Il corso selezionato non ha alcun iscritto.\n");
+			txtArea.appendText(e.getMessage() + "\n");
 		}
     }
+    
     @FXML
     void iscriviUser(ActionEvent event) {
     	try {
     		Integer matricola = Integer.parseInt(txtMatricola.getText());
+    		Corso corso = comboCorsi.getSelectionModel().getSelectedItem();
+    		   
+    		if (corso==null)
+    			throw new NullPointerException("Non è stato selezionato un corso.");
     		
-    		if (String.valueOf(matricola)==null || String.valueOf(matricola)=="") 
-    			txtArea.appendText("Non è stato inserito alcun numero matricola.\n");
-    		
-    		if (model.IscriviStudente(matricola, comboCorsi.getSelectionModel().getSelectedItem()))
+    		if (model.IscriviStudente(model.getStudente(matricola), corso))
     				txtArea.appendText("Studente iscritto al corso con successo!\n");
     		else
     			txtArea.appendText("Non è stato possibile aggiungere lo studente al corso.\n");
-    	} catch (Exception e) {
+    		
+    	}	catch (NumberFormatException e) {
+    		txtArea.appendText("Non è stato inserito un numero matricola valido: sono ammessi solo caratteri numerici\n");
+    	}	catch (Exception e) {
     		txtArea.appendText(e.getMessage()+"\n");
-    	}
+    	}  
     }
 
     @FXML

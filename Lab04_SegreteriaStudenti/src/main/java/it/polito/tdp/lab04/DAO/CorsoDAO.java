@@ -38,16 +38,15 @@ public class CorsoDAO {
 				corsi.add(new Corso(codins, numeroCrediti, nome, periodoDidattico));
 			}
 			
+			conn.close();
+			
 			if (corsi.size()==0)
 				throw new NullPointerException("Non esiste alcun insegnamento registrato.");
-			
-			conn.close();
 			
 			return corsi;
 			
 
 		} catch (SQLException e) {
-			// e.printStackTrace();
 			throw new RuntimeException("Errore nella lettura dati dal database.", e);
 		}
 	}
@@ -64,14 +63,11 @@ public class CorsoDAO {
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
-
 			st.setString(1, c.getCodIns());
 			
 			ResultSet rs = st.executeQuery();
 			
-
 			if (rs.next()) {
-
 				String codins = rs.getString("codins");
 				int numeroCrediti = rs.getInt("crediti");
 				String nome = rs.getString("nome");
@@ -79,89 +75,51 @@ public class CorsoDAO {
 
 				corso = new Corso(codins, numeroCrediti, nome, periodoDidattico);
 			}
-			
 			conn.close();
 
 			if (corso==null)
 				throw new NullPointerException("Non esiste alcun corso con tale codice insegnamento.");
 			
-			
 			return corso;
 			
-
 		} catch (SQLException e) {
-			// e.printStackTrace();
 			throw new RuntimeException("Errore nella lettura dati dal database.", e);
 		}
 	}
 	
 	
 
-	public List<Corso> getCorsiForStudente(Integer matricola) {
+	public List<Corso> getCorsiForStudente(Studente studente) {
 		
 		final String sql = "SELECT c.* FROM corso c, iscrizione i, studente s  "
 				+ " WHERE c.codins = i.codins AND s.matricola = i.matricola "
 				+ " AND s.matricola = ?";
-		
 		
 		List<Corso> corso = new LinkedList<Corso>();
 		
 		try {
 			Connection conn = ConnectDB.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
-			
-			st.setInt(1, matricola);
+			st.setInt(1, studente.getMatricola());
 	
 			ResultSet rs = st.executeQuery();
-			
 			
 			while (rs.next()) {
 				corso.add(new Corso(rs.getString("codins"), rs.getInt("crediti"), rs.getString("nome"), rs.getInt("pd")));
 			}
 			
+			conn.close();
+			
 			if (corso.size()==0)
 				throw new NullPointerException("Lo studente selezionato esiste in registro, ma non frequenta alcun corso.");
 			
-			conn.close();
 		} catch (SQLException e) {
 			throw new RuntimeException("Errore nella lettura dati dal database. ", e);
 		}
-		
 		return corso; 
-
-	}
-
-	public List<Corso> getCorsoForStudente(Studente studente, Corso corso)  {
-				
-		final String sqlAlternate = "SELECT c.* FROM corso c, iscrizione i, studente s  "
-				+ " WHERE c.codins = i.codins AND s.matricola = i.matricola "
-				+ " AND s.matricola = ? AND c.codins = ? ";		
-		
-		try {
-			Connection conn = ConnectDB.getConnection();
-			PreparedStatement st = conn.prepareStatement(sqlAlternate);
-			
-			st.setInt(1, studente.getMatricola());
-			st.setString(2, corso.getCodIns());
-	
-			ResultSet rs = st.executeQuery();
-			
-			if (!rs.next()) {
-				conn.close();
-				throw new NullPointerException("Lo studente selezionato esiste in registro, ma non frequenta il corso.");
-			}
-			else {
-				conn.close();
-				throw new RuntimeException("Lo studente è iscritto al corso selezionato!");
-			}
-		} catch(SQLException e) {
-			throw new RuntimeException("Errore nella lettura dati dal database.", e);
-		}
 	}
 	
-	/*
-	 * Data una matricola ed il codice insegnamento, iscrivi lo studente al corso.
-	 */
+	
 	public boolean inscriviStudenteACorso(Studente studente, Corso corso) {
 		final String sqlAlternate = "INSERT INTO iscrizione (matricola, codins) VALUES (?, ?) ";		
 		
@@ -174,12 +132,15 @@ public class CorsoDAO {
 	
 			Integer rs = st.executeUpdate();
 			
+			conn.close();
+			
 			if (rs==1)
 				return true;
 			
 		} catch(SQLException e) {
 			throw new RuntimeException("Errore nella lettura dati dal database.", e);
 		}
+		
 		return false;
 	}
 
