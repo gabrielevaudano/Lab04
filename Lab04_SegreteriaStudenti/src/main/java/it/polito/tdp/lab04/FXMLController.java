@@ -59,6 +59,7 @@ public class FXMLController {
 	private Model model;
 
 
+
     @FXML
     void autoCompletamento(ActionEvent event) {
     	try {
